@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Market-Mentors-LLC/interactable-controller/issues"
   },
-  "homepage": "https://github.com/Market-Mentors-LLC/interactable-controller#readme"
+  "homepage": "https://github.com/Market-Mentors-LLC/interactable-controller#readme",
+  "dependencies": {
+    "event-middleware": "git+https://github.com/Market-Mentors-LLC/event-middleware.git"
+  }
 }
