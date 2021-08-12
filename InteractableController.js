@@ -1,6 +1,6 @@
 import { EventMiddleware } from "event-middleware/Event-Middleware";
 
-class InteractableController {
+export class InteractableController {
     constructor( control, interactable, className = 'interactable-active' ) {
         this.state = false;
         this.control = control;
