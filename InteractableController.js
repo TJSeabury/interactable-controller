@@ -21,6 +21,18 @@ function isReactComponent(component) {
     )
 }
 
+function isElement(element) {
+    return React.isValidElement(element);
+}
+
+function isDOMTypeElement(element) {
+    return isElement(element) && typeof element.type === 'string';
+}
+
+function isCompositeTypeElement(element) {
+    return isElement(element) && typeof element.type === 'function';
+}
+
 export class InteractableController {
     constructor( control, interactable, options = {
         className: 'interactable-active',
@@ -40,8 +52,8 @@ export class InteractableController {
         this.closeIfInteractedOutside = this.closeIfInteractedOutside.bind( this );
 
         // Test if React
-        console.log( 'isReact?: ', isReactComponent( this.control ) );
-        if ( isReactComponent( this.control ) ) {
+        console.log( 'isReact?: ', isReactComponent( this.control ) ) || isDOMTypeElement( this.control );
+        if ( isReactComponent( this.control ) || isDOMTypeElement( this.control ) ) {
             ReactDOM.findDOMNode( this.control ).addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
         }
         else {
