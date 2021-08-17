@@ -52,8 +52,8 @@ export class InteractableController {
         this.closeIfInteractedOutside = this.closeIfInteractedOutside.bind( this );
 
         // Test if React
-        console.log( 'isReact?: ', isReactComponent( this.control ) ) || isDOMTypeElement( this.control );
-        if ( isReactComponent( this.control ) || isDOMTypeElement( this.control ) ) {
+        console.log( 'isReact?: ', !! ReactDOM );
+        if ( ReactDOM ) {
             ReactDOM.findDOMNode( this.control ).addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
         }
         else {
