@@ -40,6 +40,7 @@ export class InteractableController {
         this.closeIfInteractedOutside = this.closeIfInteractedOutside.bind( this );
 
         // Test if React
+        console.log( 'isReact?: ', isReactComponent( this.control ) );
         if ( isReactComponent( this.control ) ) {
             ReactDOM.findDOMNode( this.control ).addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
         }
