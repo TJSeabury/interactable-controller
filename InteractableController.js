@@ -1,11 +1,36 @@
 import { EventMiddleware } from "event-middleware/Event-Middleware";
 
+function isClassComponent(component) {
+    return (
+        typeof component === 'function' && 
+        !!component.prototype.isReactComponent
+    )
+}
+
+function isFunctionComponent(component) {
+    return (
+        typeof component === 'function' && 
+        String(component).includes('return React.createElement')
+    )
+}
+
+function isReactComponent(component) {
+    return (
+        isClassComponent(component) || 
+        isFunctionComponent(component)
+    )
+}
+
 export class InteractableController {
-    constructor( control, interactable, className = 'interactable-active' ) {
+    constructor( control, interactable, options = {
+        className: 'interactable-active',
+        closeOnScroll: true,
+        closeOnOutside: true
+    } ) {
         this.state = false;
         this.control = control;
         this.interactable = interactable;
-        this.className = className;
+        this.className = options.className;
 
         this.open = this.open.bind( this );
         this.maybeShouldOpen = this.maybeShouldOpen.bind( this );
@@ -14,7 +39,14 @@ export class InteractableController {
         this.toggle = this.toggle.bind( this );
         this.closeIfInteractedOutside = this.closeIfInteractedOutside.bind( this );
 
-        this.control.addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
+        // Test if React
+        if ( isReactComponent( this.control ) ) {
+            ReactDOM.findDOMNode( this.control ).addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
+        }
+        else {
+            this.control.addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
+        }
+        
         window.addEventListener( 'scroll', this.maybeShouldClose );
         window.addEventListener( 'click', this.closeIfInteractedOutside );
     }
