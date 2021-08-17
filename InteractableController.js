@@ -1,48 +1,22 @@
 import { EventMiddleware } from "event-middleware/Event-Middleware";
 
-function isClassComponent(component) {
-    return (
-        typeof component === 'function' && 
-        !!component.prototype.isReactComponent
-    )
-}
-
-function isFunctionComponent(component) {
-    return (
-        typeof component === 'function' && 
-        String(component).includes('return React.createElement')
-    )
-}
-
-function isReactComponent(component) {
-    return (
-        isClassComponent(component) || 
-        isFunctionComponent(component)
-    )
-}
-
-function isElement(element) {
-    return React.isValidElement(element);
-}
-
-function isDOMTypeElement(element) {
-    return isElement(element) && typeof element.type === 'string';
-}
-
-function isCompositeTypeElement(element) {
-    return isElement(element) && typeof element.type === 'function';
-}
-
 export class InteractableController {
     constructor( control, interactable, options = {
         className: 'interactable-active',
         closeOnScroll: true,
         closeOnOutside: true
     } ) {
+        const {
+            className,
+            closeOnScroll,
+            closeOnOutside
+        } = options;
+
         this.state = false;
         this.control = control;
         this.interactable = interactable;
-        this.className = options.className;
+        this.options = options;
+        this.className = className;
 
         this.open = this.open.bind( this );
         this.maybeShouldOpen = this.maybeShouldOpen.bind( this );
@@ -51,17 +25,13 @@ export class InteractableController {
         this.toggle = this.toggle.bind( this );
         this.closeIfInteractedOutside = this.closeIfInteractedOutside.bind( this );
 
-        // Test if React
-        console.log( 'isReact?: ', !! ReactDOM );
-        if ( ReactDOM ) {
-            ReactDOM.findDOMNode( this.control ).addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
-        }
-        else {
-            this.control.addEventListener( 'click', EventMiddleware.prevent( this.toggle ) );
-        }
+        this.toggle = EventMiddleware.prevent( this.toggle );
+
+        this.control.addEventListener( 'click', this.toggle );
         
-        window.addEventListener( 'scroll', this.maybeShouldClose );
-        window.addEventListener( 'click', this.closeIfInteractedOutside );
+        if ( closeOnScroll ) window.addEventListener( 'scroll', this.maybeShouldClose );
+
+        if ( closeOnOutside ) window.addEventListener( 'click', this.closeIfInteractedOutside );
     }
 
     /**
@@ -117,7 +87,7 @@ export class InteractableController {
      * Closes the interactable if the user interacts with the window outside of the interactable or its control.
      * @param {Event} ev 
      */
-     closeIfInteractedOutside( ev ) {
+    closeIfInteractedOutside( ev ) {
         EventMiddleware.ifNotLocal(
             ev,
             this.maybeShouldClose,
@@ -127,6 +97,15 @@ export class InteractableController {
                 this.interactable
             ]
         );
+    }
+
+    cleanUp() {
+        this.control.removeEventListener( 'click', this.toggle );
+        if ( this.options.closeOnScroll ) window.removeEventListener( 'scroll', this.maybeShouldClose );
+        if ( this.options.closeOnOutside ) window.removeEventListener( 'click', this.closeIfInteractedOutside );
+
+        this.control = null;
+        this.interactable = null;
     }
 
 }
